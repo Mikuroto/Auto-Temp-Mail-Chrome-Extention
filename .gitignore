@@ -1,0 +1,18 @@
+# API keys and sensitive configuration
+config.js
+
+# Test files with API keys
+test_api.js
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log

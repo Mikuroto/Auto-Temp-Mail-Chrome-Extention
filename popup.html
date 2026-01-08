@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auto Temp Mail</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Auto Temp Mail</h1>
+
+    <div class="email-section">
+      <label>Current Email:</label>
+      <div class="email-display">
+        <input type="text" id="email-input" readonly placeholder="No email generated">
+        <button id="copy-btn" title="Copy">📋</button>
+      </div>
+      <div class="action-buttons">
+        <button id="generate-btn">Generate New Email</button>
+        <button id="fill-btn" title="Fill Email on current site">Fill Email</button>
+        <button id="delete-btn" title="Delete current email" class="danger-btn">Delete</button>
+      </div>
+    </div>
+
+    <div class="message-section">
+      <label>Latest Message:</label>
+      <div id="message-display" class="message-box">Waiting for messages...</div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+
+</html>
