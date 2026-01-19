@@ -23,8 +23,8 @@ This extension uses [Boomlify](https://boomlify.com) API for temporary emails. G
 
 ```javascript
 const CONFIG = {
-    API_KEY: 'your_actual_api_key',
-    API_BASE_URL: 'https://v1.boomlify.com'
+  API_KEY: "your_actual_api_key",
+  API_BASE_URL: "https://v1.boomlify.com",
 };
 ```
 

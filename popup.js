@@ -94,13 +94,20 @@ document.addEventListener('DOMContentLoaded', () => {
             const from = msg.from_email || 'Unknown sender';
             const textBody = msg.body_text || msg.text_body || '';
             const htmlBody = msg.body_html || msg.html_body || '';
-            let body = textBody || htmlBody || 'No content';
-
-            // Clean up excessive line breaks (limit to max 2 consecutive)
-            body = body.replace(/\n{3,}/g, '\n\n');
-
-            // Make URLs clickable - do this BEFORE escaping HTML
-            const bodyWithLinks = linkifyText(body);
+            
+            let bodyContent = '';
+            
+            // Prefer HTML body if available, otherwise use text
+            if (htmlBody) {
+                // Sanitize and render HTML
+                bodyContent = sanitizeHtml(htmlBody);
+            } else if (textBody) {
+                // For plain text, escape and linkify
+                let body = textBody.replace(/\n{3,}/g, '\n\n');
+                bodyContent = linkifyText(body).replace(/\n/g, '<br>');
+            } else {
+                bodyContent = '<span class="no-content">No content</span>';
+            }
 
             html += `
         <div class="message-item ${isLatest ? 'expanded' : 'collapsed'}" data-index="${index}">
@@ -109,8 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="message-from">${escapeHtml(from)}</div>
             <div class="toggle-icon">${isLatest ? '▼' : '▶'}</div>
           </div>
-          <div class="message-body" style="display: ${isLatest ? 'block' : 'none'}">
-            ${bodyWithLinks.replace(/\n/g, '<br>')}
+          <div class="message-body html-content" style="display: ${isLatest ? 'block' : 'none'}">
+            ${bodyContent}
           </div>
         </div>
       `;
@@ -149,6 +156,49 @@ document.addEventListener('DOMContentLoaded', () => {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    function sanitizeHtml(html) {
+        // Create a temporary element to parse HTML
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        
+        // Remove dangerous elements
+        const dangerousTags = ['script', 'style', 'iframe', 'object', 'embed', 'form'];
+        dangerousTags.forEach(tag => {
+            const elements = temp.querySelectorAll(tag);
+            elements.forEach(el => el.remove());
+        });
+        
+        // Remove event handlers and dangerous attributes from all elements
+        const allElements = temp.querySelectorAll('*');
+        allElements.forEach(el => {
+            // Remove event handlers
+            Array.from(el.attributes).forEach(attr => {
+                if (attr.name.startsWith('on') || attr.name === 'href' && attr.value.startsWith('javascript:')) {
+                    el.removeAttribute(attr.name);
+                }
+            });
+            
+            // Make links open in new tab
+            if (el.tagName === 'A' && el.hasAttribute('href')) {
+                el.setAttribute('target', '_blank');
+                el.setAttribute('rel', 'noopener noreferrer');
+                el.classList.add('message-link');
+            }
+            
+            // Remove inline styles that could break layout (keep colors and basic formatting)
+            if (el.hasAttribute('style')) {
+                const style = el.getAttribute('style');
+                // Keep only safe styles
+                const safeStyle = style.replace(/position\s*:/gi, '')
+                                       .replace(/z-index\s*:/gi, '')
+                                       .replace(/overflow\s*:/gi, '');
+                el.setAttribute('style', safeStyle);
+            }
+        });
+        
+        return temp.innerHTML;
     }
 
     function linkifyText(text) {
